@@ -37,7 +37,8 @@ To answer the following questions from the above data source.
 
 ### Install the necessary libraries.
 
-```{r, echo=TRUE}
+
+```r
 library("knitr")
 library("lubridate")
 ```
@@ -49,12 +50,14 @@ library("lubridate")
 Show any code that is needed to:
 
 1. Load the data (i.e. read.csv())
-```{r, echo=TRUE}
+
+```r
 baseData <- read.csv("activity.csv")
 ```
 
 2. Process/transform the data (if necessary) into a format suitable for your analysis
-```{r, echo=TRUE}
+
+```r
 baseData$date <- ymd(baseData$date)
 ```
 
@@ -63,34 +66,57 @@ baseData$date <- ymd(baseData$date)
 For this part of the assignment, you can ignore the missing values in the dataset.
 
 1. Calculate the total number of steps taken per day
-```{r, echo=TRUE}
+
+```r
 dailySteps <- aggregate(steps~date, baseData, FUN=sum, na.rm=TRUE)
 ```
 
 2. Make a histogram of the total number of steps taken each day
-```{r, echo=TRUE}
+
+```r
 hist(dailySteps$steps, 10, main = "Distribution of Steps Per Day", xlab = "Steps Per Day", col = "Green")
 ```
 
-3. Calculate and report the mean and median of the total number of steps taken per day
-```{r, echo=TRUE}
-mean(dailySteps$steps)
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 
+3. Calculate and report the mean and median of the total number of steps taken per day
+
+```r
+mean(dailySteps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(dailySteps$steps)
+```
+
+```
+## [1] 10765
 ```
 
 ### C - What is the average daily activity pattern?
 
 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r, echo=TRUE}
+
+```r
 intervalSteps <- aggregate(steps~interval, baseData, FUN=mean, na.rm=TRUE)
 plot(intervalSteps, type = "l", main = "Daily Average Step Count by Interval", xlab="Interval", ylab="Average Daily Steps", col="Blue")
 ```
 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
-```{r, echo=TRUE}
+
+```r
 intervalSteps$interval[which.max(intervalSteps$steps)]
+```
+
+```
+## [1] 835
 ```
 
 ### D - Imputing missing values
@@ -98,15 +124,21 @@ intervalSteps$interval[which.max(intervalSteps$steps)]
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
-```{r, echo=TRUE}
+
+```r
 sum(is.na(baseData))
+```
+
+```
+## [1] 2304
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 **Answer:** Since we already have the mean for 5-minute intervals, this will be the source of the imputed data.
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
-```{r, echo=TRUE}
+
+```r
 cleanData <- merge(baseData, intervalSteps, by = "interval", suffixes = c("",".avg"))
 naData <- is.na(cleanData$steps)
 cleanData$steps[naData] <- cleanData$steps.avg[naData]
@@ -114,24 +146,65 @@ cleanData$steps.avg <- NULL
 ```
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
-```{r, echo=TRUE}
+
+```r
 dailyCleanSteps <- aggregate(steps~date, cleanData, FUN=sum, na.rm=TRUE)
 hist(dailyCleanSteps$steps, 10, main = "Distribution of Steps Per Day (Clean)", xlab = "Steps Per Day", col = "Red")
+```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+
+```r
 mean(dailyCleanSteps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(dailyCleanSteps$steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 5. Do these values differ from the estimates from the first part of the assignment? 
 For the mean
-```{r, echo=TRUE}
+
+```r
 mean(dailyCleanSteps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 mean(dailySteps$steps)
 ```
 
+```
+## [1] 10766.19
+```
+
 For the median
-```{r, echo=TRUE}
+
+```r
 median(dailyCleanSteps$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(dailySteps$steps)
+```
+
+```
+## [1] 10765
 ```
 
 6. What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -143,7 +216,8 @@ median(dailySteps$steps)
 For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
 
 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
-```{r, echo=TRUE}
+
+```r
 cleanDataDays <- cleanData
 cleanDataDays$weekday <- weekdays(cleanDataDays$date)
 cleanDataDays$isWeekend <- ifelse(cleanDataDays$weekday=="Saturday" | cleanDataDays$weekday=="Sunday","Weekend","Weekday")
@@ -151,12 +225,14 @@ cleanDataDays$isWeekend <- ifelse(cleanDataDays$weekday=="Saturday" | cleanDataD
 
 
 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
-```{r, echo=TRUE}
+
+```r
 weekdayCleanDataDays <- aggregate(steps ~ interval + isWeekend, cleanDataDays, FUN=mean)
 weekdayData <- weekdayCleanDataDays[ which(weekdayCleanDataDays$isWeekend=="Weekday"),]
 weekendData <- weekdayCleanDataDays[ which(weekdayCleanDataDays$isWeekend=="Weekend"),]
 par(mfrow=c(2,1))
 plot(weekdayData$steps, type = "l", main = "Average Steps by Interval (Weekday)", xlab = "Interval", ylab = "Steps")
 plot(weekendData$steps, type = "l", main = "Average Steps by Interval (Weekend)", xlab = "Interval", ylab = "Steps")
-
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
